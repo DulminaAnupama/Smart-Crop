@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Crop Recommendation - Sri Lanka</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌾 Smart Crop Recommendation</h1>
+            <p class="subtitle">AI-Based Crop Advisory for Sri Lankan Farmers</p>
+            <p class="sinhala">ශ්‍රී ලාංකික ගොවීන් සඳහා බෝග නිර්දේශ පද්ධතිය</p>
+        </header>
+
+        <main>
+            <form method="POST" class="input-form">
+                <h2>Enter Your Land Details</h2>
+                <p class="form-desc">ඔබේ ඉඩම් විස්තර ඇතුළත් කරන්න</p>
+                
+                <div class="form-group">
+                    <label for="soil_type">Soil Type (පස වර්ගය)</label>
+                    <select name="soil_type" id="soil_type" required>
+                        <option value="">-- Select Soil Type --</option>
+                        <option value="clay" {% if inputs and inputs.soil_type == 'clay' %}selected{% endif %}>Clay (මැටි පස)</option>
+                        <option value="sandy" {% if inputs and inputs.soil_type == 'sandy' %}selected{% endif %}>Sandy (වැලි පස)</option>
+                        <option value="loamy" {% if inputs and inputs.soil_type == 'loamy' %}selected{% endif %}>Loamy (පස්කැට පස)</option>
+                        <option value="red" {% if inputs and inputs.soil_type == 'red' %}selected{% endif %}>Red Earth (රතු පස)</option>
+                        <option value="laterite" {% if inputs and inputs.soil_type == 'laterite' %}selected{% endif %}>Laterite (කබොක් පස)</option>
+                        <option value="alluvial" {% if inputs and inputs.soil_type == 'alluvial' %}selected{% endif %}>Alluvial (සාරවත් පස)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="rainfall">Annual Rainfall (වාර්ෂික වර්ෂාපතනය) - mm</label>
+                    <input type="number" name="rainfall" id="rainfall" 
+                           placeholder="e.g., 1500" min="0" max="5000" required
+                           value="{{ inputs.rainfall if inputs else '' }}">
+                    <span class="hint">Sri Lanka average: 500-3500 mm</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="temperature">Average Temperature (සාමාන්‍ය උෂ්ණත්වය) - °C</label>
+                    <input type="number" name="temperature" id="temperature" 
+                           placeholder="e.g., 28" min="10" max="45" step="0.1" required
+                           value="{{ inputs.temperature if inputs else '' }}">
+                    <span class="hint">Sri Lanka range: 15-35°C</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="land_area">Land Area (ඉඩම් ප්‍රමාණය) - Acres</label>
+                    <input type="number" name="land_area" id="land_area" 
+                           placeholder="e.g., 2.5" min="0.1" max="1000" step="0.1" required
+                           value="{{ inputs.land_area if inputs else '' }}">
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Get Recommendations
+                    <span class="btn-sinhala">නිර්දේශ ලබාගන්න</span>
+                </button>
+            </form>
+
+            {% if recommendations %}
+            <section class="results">
+                <h2>🌱 Recommended Crops</h2>
+                <p class="results-desc">Based on your conditions for {{ inputs.land_area }} acres</p>
+
+                {% if recommendations|length == 0 %}
+                <div class="no-results">
+                    <p>No suitable crops found for the given conditions.</p>
+                    <p>Try adjusting your input values.</p>
+                </div>
+                {% else %}
+                <div class="crop-cards">
+                    {% for crop in recommendations %}
+                    <div class="crop-card {% if loop.first %}best-match{% endif %}">
+                        {% if loop.first %}
+                        <span class="badge">Best Match</span>
+                        {% endif %}
+                        
+                        <h3>{{ crop.name }}</h3>
+                        
+                        <div class="score-bar">
+                            <div class="score-fill" style="width: {{ crop.score }}%"></div>
+                            <span class="score-text">{{ crop.score }}% Match</span>
+                        </div>
+
+                        <div class="crop-details">
+                            <div class="detail">
+                                <span class="label">Expected Yield</span>
+                                <span class="value">{{ "{:,.0f}".format(crop.yield) }} kg</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Yield per Acre</span>
+                                <span class="value">{{ "{:,.0f}".format(crop.yield_per_acre) }} kg</span>
+                            </div>
+                            <div class="detail">
+                                <span class="label">Growing Season</span>
+                                <span class="value">{{ crop.season }}</span>
+                            </div>
+                        </div>
+
+                        <p class="tips">💡 {{ crop.tips }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>Smart Crop Recommendation System for Sri Lankan Farmers</p>
+            <p class="footer-sinhala">ශ්‍රී ලාංකික ගොවීන් සඳහා නිර්මාණය කරන ලදී</p>
+        </footer>
+    </div>
+</body>
+</html>
+
